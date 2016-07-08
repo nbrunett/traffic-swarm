@@ -15,7 +15,7 @@ class vehicle:
         self.direction = direction #north of east
         self.pos = pos
         self.vel = vel
-        self.speed = np.linalg.norm([vel[0], vel[1]])
+        self.speed = np.linalg.norm(self.vel)
 
     def changePosition(self, accel, dt):
         #for moving the vehicle, can be with or without acceleration        
@@ -29,7 +29,7 @@ class vehicle:
         self.vel[0] += (dt/2.0)*accel[0]
         self.vel[1] += (dt/2.0)*accel[1]
 
-        self.speed = np.linalg.norm([vX, vY])
+        self.speed = np.linalg.norm(self.vel)
 
     def changeDirection(self, delDirection):
         self.direction += delDirection

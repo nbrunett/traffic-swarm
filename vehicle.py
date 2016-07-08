@@ -2,7 +2,7 @@ import numpy as np
 
 class vehicle:
     def __init__(self, width, length, height, weight, nWheels, maxSpeed, \
-                 maxAccel, maxFuel, fuel, direction, x, y, vx, vy):
+                 maxAccel, maxFuel, fuel, direction, pos, vel):
         self.width = width
         self.length = length
         self.height = height
@@ -12,30 +12,27 @@ class vehicle:
         self.maxAccel = maxAccel
         self.maxFuel = maxFuel
         self.fuel = fuel
-        self.direction = direction
-        self.x = x
-        self.y = y
-        self.vx = vx
-        self.vy = vy
-        self.speed = np.sqrt(self.vx**2 + self.vy**2)
+        self.direction = direction #north of east
+        self.pos = pos
+        self.vel = vel
+        self.speed = np.linalg.norm([vel[0], vel[1]])
 
-    def changePosition(self, accelX, accelY, dt):
+    def changePosition(self, accel, dt):
         #for moving the vehicle, can be with or without acceleration        
         #kick velocity
-        self.vx += (dt/2.0)*accelX
-        self.vy += (dt/2.0)*accelY
+        self.vel[0] += (dt/2.0)*accel[0]
+        self.vel[1] += (dt/2.0)*accel[1]
         #drift position
-        self.x += dt*self.vx
-        self.y += dt*self.vy
+        self.pos[0] += dt*self.vel[0]
+        self.pos[1] += dt*self.vel[1]
         #kick velocity
-        self.vx += (dt/2.0)*accelX
-        self.vy += (dt/2.0)*accelY
+        self.vel[0] += (dt/2.0)*accel[0]
+        self.vel[1] += (dt/2.0)*accel[1]
 
-        self.speed = np.sqrt(self.vx**2 + self.vy**2)
+        self.speed = np.linalg.norm([vX, vY])
 
-    def changeDirection(self):
-        #did I ever figure this out for kerbacalc?
-        pass
+    def changeDirection(self, delDirection):
+        self.direction += delDirection
 
     def burnFuel(self, fuelBurnt):
         #could include decreasing weight by fuel amount
@@ -45,12 +42,12 @@ class vehicle:
     def getOnHighway(self, start, end, dt):
         finalSpeed = 29.06
         speedDiff = finalSpeed - self.speed
-        dist = np.sqrt((start[0] - end[0])**2 + (start[1] - end[1])**2)
-        accel = speedDiff**2/(2*dist)
+        dist = np.linalg.norm(start-end)
+        accel = speedDiff**2/(2.0*dist)
         if accel > self.maxAccel:
             accel = self.maxAccel
-            finalSpeed = np.sqrt(2*self.maxAccel*dist)
-        dirMag = np.sqrt((end[0] - start[0])**2 + (end[1] - start[1])**2)
+            finalSpeed = np.sqrt(2.0*self.maxAccel*dist)
+        dirMag = np.linalg.norm(end-start)
         direction = np.array([end[0]-start[0], end[1]-start[1]])/dirMag
         while self.speed < finalSpeed:
-            self.changePosition(accel*direction[0], accel*direction[1], dt)
+            self.changePosition([accel*direction[0], accel*direction[1]], dt)

@@ -1,5 +1,7 @@
 import numpy as np
 
+transFric = 0.1
+
 class vehicle:
     def __init__(self, width, length, height, weight, nWheels, maxSpeed, \
                  maxAccel, maxFuel, fuel, direction, pos, vel):
@@ -12,22 +14,29 @@ class vehicle:
         self.maxAccel = maxAccel
         self.maxFuel = maxFuel
         self.fuel = fuel
-        self.direction = direction #north of east
+        self.direction = direction #north of east; radians
         self.pos = pos
         self.vel = vel
         self.speed = np.linalg.norm(self.vel)
 
     def changePosition(self, accel, dt):
-        #for moving the vehicle, can be with or without acceleration        
+        #find unit vector perpendicular to direction
+        dirVec = np.array([np.cos(self.direction), np.sin(self.direction)])
+        if dirVec[0] == 0.0:
+            perp = np.array([1.0, -dirVec[0]/dirVec[1]])
+        else:
+            perp = np.array([-dirVec[1]/dirVec[0], 1.0])
+        perp /= np.linalg.norm(perp)
+        transVel = np.dot(self.vel, perp)
+        transCorr = -transVel*perp*transFric
+        
         #kick velocity
-        self.vel[0] += (dt/2.0)*accel[0]
-        self.vel[1] += (dt/2.0)*accel[1]
+        accel = np.array(accel)
+        self.vel += (dt/2.0)*accel + transCorr
         #drift position
-        self.pos[0] += dt*self.vel[0]
-        self.pos[1] += dt*self.vel[1]
+        self.pos += dt*self.vel
         #kick velocity
-        self.vel[0] += (dt/2.0)*accel[0]
-        self.vel[1] += (dt/2.0)*accel[1]
+        self.vel += (dt/2.0)*accel + transCorr
 
         self.speed = np.linalg.norm(self.vel)
 

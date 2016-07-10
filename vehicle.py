@@ -37,7 +37,6 @@ class vehicle:
         transDrag = -transVel*perp*transFric
 
         #kick velocity
-        accel = np.array(accel)
         self.vel += (dt/2.0)*accel + parDrag + transDrag
         #drift position
         self.pos += dt*self.vel
@@ -68,4 +67,8 @@ class vehicle:
         dirMag = np.linalg.norm(end-start)
         direction = np.array([end[0]-start[0], end[1]-start[1]])/dirMag
         while self.speed < finalSpeed:
-            self.changePosition([accel*direction[0], accel*direction[1]], dt)
+            self.changePosition(accel*direction, dt)
+
+
+    def getOffHighway(self, start, end, dt):
+        pass
